@@ -1,13 +1,13 @@
 # Data-Matrix-Testing
 LEGO Spike 3.0 python Test to practice Data 2-D data entry
 
-Index,Name,Data Type (Suggested)
-0,Num,Integer (Used for Sorting)
-1,Name,String (Identifier)
-2,X,Float (Coordinate)
-3,Y,Float (Coordinate)
-4,Dir,Integer (0-360 Heading)
-5,F/R,"String (""F"" for Forward, ""R"" for Reverse)"
+Index,Name,Type,Description
+0,Num,int,The ID or Sequence number (used for sorting).
+1,Name,str,"A label for the point (e.g., ""Home"", ""Base"")."
+2,X,float,"X-coordinate in your chosen units (cm, inches, etc.)."
+3,Y,float,Y-coordinate in your chosen units.
+4,Dir,int,The target heading/compass angle (0–359).
+5,F/R,int,"1 for Forward, -1 for Reverse."
 
 Method,Usage,Description
 "append_row([a,b,c,d,e])",Add to end,Best for continuous logging.

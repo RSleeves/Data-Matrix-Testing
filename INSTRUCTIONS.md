@@ -1,65 +1,60 @@
-# 📘 DataMaster System Instructions
+# 🤖 DataMaster Master Controller Guide
 
-Welcome to the **DataMaster** documentation. This system is designed to provide LEGO SPIKE Prime 3.0 users with a professional-grade 2D data management and navigation engine.
+The **DataMaster** class is an all-in-one system for LEGO SPIKE Prime 3.0. It allows you to manage robot paths using a 2D table, store coordinates permanently on the Hub, and execute autonomous driving missions.
 
 ---
 
-## 🏗 The 6-Column Data Structure
-To ensure compatibility with the navigation and sorting engines, every data row must follow this strict 6-column format:
+## 📋 1. The 6-Column Data Protocol
+The navigation and motor engines require every row to have exactly 6 columns in this order:
 
-| Index | Column Name | Type | Description |
+| Index | Header | Type | Description |
 | :--- | :--- | :--- | :--- |
-| **0** | **Num** | `int` | **ID/Order:** Used for chronological sorting. |
-| **1** | **Name** | `str` | **Label:** A unique name for the waypoint (e.g., "Gate_A"). |
-| **2** | **X** | `float` | **X-Coord:** Horizontal position in your units (cm/in). |
-| **3** | **Y** | `float` | **Y-Coord:** Vertical position in your units (cm/in). |
-| **4** | **Dir** | `int` | **Target Heading:** Target angle (0-359°). |
-| **5** | **F/R** | `int` | **Motor Modifier:** `1` for Forward, `-1` for Reverse. |
+| **0** | **Num** | `int` | **Sequence ID:** Used for sorting mission steps. |
+| **1** | **Name** | `str` | **Label:** A name for the waypoint (e.g., "Dock_A"). |
+| **2** | **X** | `float` | **X-Coordinate:** Position on the horizontal axis (cm). |
+| **3** | **Y** | `float` | **Y-Coordinate:** Position on the vertical axis (cm). |
+| **4** | **Dir** | `int` | **Target Angle:** The compass heading (0-359°). |
+| **5** | **F/R** | `int` | **Drive Mode:** `1` = Forward, `-1` = Reverse. |
 
 ---
 
-## 🛠 Function Guide
+## 🛠️ 2. Key Functions
 
-### 1. Data Entry & Modification
-Use these methods to manage the table in the Hub's memory (RAM).
-* **`append_row([list])`**: Adds a new row. *Usage:* `db.append_row([1, "Start", 0, 0, 0, 1])`
-* **`modify_cell(row, col, value)`**: Updates a specific value.
-* **`delete_row(index)`**: Removes a row by its position in the list.
-* **`sort_by_num()`**: Automatically re-orders the table so Point #1 comes before Point #2.
+### Data Management
+* `append_row([data])`: Adds a new 6-column list to the end of the table.
+* `modify_cell(row, col, value)`: Updates a specific piece of information.
+* `delete_row(index)`: Removes a waypoint and shifts others up.
+* `sort_by_num()`: Re-orders the table numerically based on Column 0.
 
-### 2. File & Console Operations (The "Bridge")
-These functions move data between the **Robot**, the **Hub's Memory**, and your **Computer**.
+### Navigation & Driving
+* `get_navigation(start_idx, end_idx)`: Calculates the **Distance** (Pythagoras) and **Heading** (Atan2) between two points.
+* `await drive_to_target(target_idx, base_speed, current_idx)`:
+    * Automatically calculates the path.
+    * Sets motor direction using the **F/R** column.
+    * Commands the `MotorPair` to move the calculated distance.
 
-* **`save_to_hub()`**: Writes the table to the Hub's flash storage. **Data stays saved even if the battery is removed.**
-* **`load_from_hub()`**: Loads the previously saved `.csv` file back into the program.
-* **`export_to_console()`**: Prints the table as raw CSV text. You can copy this text and paste it into **Excel** or **Google Sheets**.
-* **`import_from_console()`**: (Async) Pauses the program and waits for you to paste data from a spreadsheet into the SPIKE App console. Type `END` to finish.
-
-### 3. Navigation Logic
-* **`get_navigation(start_idx, end_idx)`**:
-    Calculates the straight-line distance and the required heading (angle) to travel between two rows.
-    * **Distance:** Calculated via Pythagorean Theorem ($a^2 + b^2 = c^2$).
-    * **Heading:** Calculated via `atan2` to provide a 0-360° compass bearing.
+### Storage & Transfer
+* `save_to_hub()`: Saves the table to the Hub's flash memory as a `.csv`. Data persists after power-off.
+* `load_from_hub()`: Restores your saved path into the robot's memory.
+* `export_to_console()`: Prints the table for copy-pasting into **Excel/Google Sheets**.
+* `import_from_console()`: (Async) Waits for you to paste CSV rows from your computer into the terminal. Type `END` to finish.
 
 ---
 
-## 🚀 How to Add New Data via Computer
-If you have a list of coordinates in Excel and want to put them on your robot:
-1.  **Format** your Excel sheet to have these 6 columns.
-2.  **Copy** the data rows.
-3.  **Run** the robot script and call `await db.import_from_console()`.
-4.  **Paste** the data into the SPIKE App terminal.
-5.  Type `END` and press Enter.
-6.  Call `db.save_to_hub()` to lock the data into the robot's memory.
-
----
-
-## 💡 Code Snippet: Using F/R for Driving
-The **F/R** column (Index 5) is designed to simplify your driving code. Use it as a multiplier for your speed:
+## 🚀 3. Quick Start Example
 
 ```python
-row = db.table[0]
-base_speed = 50
-# If F/R is -1, move_speed becomes -50 (Reverse)
-move_speed = base_speed * row[5] 
-motor_pair.move_for_distance(PAIR, dist, 'cm', velocity=move_speed)
+# 1. Setup the Controller
+db = DataMaster(motor_pair.PAIR_1, port.A, port.B, "MissionOne")
+
+# 2. Define your Path
+db.append_row([1, "Start", 0, 0, 0, 1])
+db.append_row([2, "Target_A", 50, 0, 0, 1])  # 50cm Forward
+db.append_row([3, "Return", 20, 0, 0, -1])  # Reverse to the 20cm mark
+
+# 3. Run the Mission
+await db.drive_to_target(target_idx=1, current_idx=0)
+await db.drive_to_target(target_idx=2, current_idx=1)
+
+# 4. Save to Hub
+db.save_to_hub()

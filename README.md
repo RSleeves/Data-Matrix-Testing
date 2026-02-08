@@ -6,3 +6,7 @@ Method,Usage,Description
 "insert_row(0, [...])",Add at index,Useful if you need to put a header or priority data at the top.
 "modify_cell(r, c, val)",Update value,"Best for updating a ""Status"" or ""Max Value"" column."
 delete_row(index),Remove data,Keeps memory clean by removing old or irrelevant data.
+clear_table(self), to clear the table
+save_to_csv(self) , to save Hub's flash storage
+load_from_csv, Reads data from Hub's Flash storage
+display(self), Prints table to console

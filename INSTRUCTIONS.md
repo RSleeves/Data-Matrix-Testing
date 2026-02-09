@@ -58,3 +58,31 @@ await db.drive_to_target(target_idx=2, current_idx=1)
 
 # 4. Save to Hub
 db.save_to_hub()
+
+# 5. How to Use DataMaster as an Import
+To keep your code clean, you should keep the Class in one file and your Mission Logic in another. Here is how to set that up in the SPIKE App.
+
+1. Create the Library File
+Open the SPIKE App and start a new Python Project.
+
+Rename this project exactly: DataMaster.py.
+
+Paste the full DataMaster class code into this file.
+
+Important: In SPIKE 3.0, you must "Run" or "Download" this file to the Hub at least once so the Hub saves it to its internal memory.
+
+2. Create your Mission File
+Start another new Python Project.
+
+At the very top of your code, add this line:
+
+Python
+
+from DataMaster import DataMaster
+
+You can now use all the functions as described in the Quick Start guide.
+
+# 6. Troubleshooting Imports
+ModuleNotFoundError: If you get this error, it means the Hub cannot find DataMaster.py. Ensure the filename is spelled exactly right (case-sensitive) and that you have downloaded/saved it to the Hub previously.
+
+Circular Imports: Never try to import main inside DataMaster.py. Keep the class "clean" and only import it into your mission scripts.
